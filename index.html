@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#92400E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>HomeLog - Home Inventory</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="header-top">
+                <div class="logo">
+                    <span class="logo-icon">&#127968;</span>
+                    <span class="logo-text">HomeLog</span>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" id="btnLang" title="Language">&#127760;</button>
+                    <button class="icon-btn" id="btnExport" title="Export">&#128196;</button>
+                </div>
+            </div>
+            <div class="total-bar">
+                <span data-i18n="total_value">Total Value</span>
+                <span class="total-amount" id="totalValue">$0</span>
+            </div>
+        </header>
+
+        <main id="mainContent">
+            <!-- Rooms View -->
+            <section id="viewRooms" class="view active">
+                <div class="section-header">
+                    <h2 data-i18n="rooms">Rooms</h2>
+                    <button class="add-btn" id="btnAddRoom">+</button>
+                </div>
+                <div id="roomGrid" class="room-grid"></div>
+            </section>
+
+            <!-- Items View (inside a room) -->
+            <section id="viewItems" class="view">
+                <div class="section-header">
+                    <button class="back-btn" id="btnBackToRooms">&#8249; <span data-i18n="rooms">Rooms</span></button>
+                    <button class="add-btn" id="btnAddItem">+</button>
+                </div>
+                <h2 class="room-title" id="itemsRoomTitle"></h2>
+                <div id="itemList" class="item-list"></div>
+            </section>
+
+            <!-- Summary View -->
+            <section id="viewSummary" class="view">
+                <div class="section-header">
+                    <h2 data-i18n="summary">Summary</h2>
+                </div>
+                <div id="summaryChart" class="summary-chart"></div>
+                <div id="summaryList" class="summary-list"></div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="viewRooms">
+                <span class="nav-icon">&#127968;</span>
+                <span data-i18n="rooms">Rooms</span>
+            </button>
+            <button class="nav-item" data-view="viewSummary">
+                <span class="nav-icon">&#128202;</span>
+                <span data-i18n="summary">Summary</span>
+            </button>
+        </nav>
+
+        <!-- Modal: Add Room -->
+        <div class="modal-overlay" id="modalAddRoom" style="display:none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 data-i18n="add_room">Add Room</h3>
+                    <button class="close-btn" id="btnCloseAddRoom">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label data-i18n="room_name">Room Name</label>
+                        <input type="text" id="inputRoomName" class="form-input" placeholder="e.g. Living Room">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="room_icon">Icon</label>
+                        <div class="icon-picker" id="iconPicker">
+                            <button class="icon-opt selected" data-icon="&#127968;">&#127968;</button>
+                            <button class="icon-opt" data-icon="&#128715;">&#128715;</button>
+                            <button class="icon-opt" data-icon="&#128164;">&#128164;</button>
+                            <button class="icon-opt" data-icon="&#128703;">&#128703;</button>
+                            <button class="icon-opt" data-icon="&#127963;">&#127963;</button>
+                            <button class="icon-opt" data-icon="&#128187;">&#128187;</button>
+                            <button class="icon-opt" data-icon="&#127911;">&#127911;</button>
+                            <button class="icon-opt" data-icon="&#127912;">&#127912;</button>
+                            <button class="icon-opt" data-icon="&#128293;">&#128293;</button>
+                            <button class="icon-opt" data-icon="&#9968;">&#9968;</button>
+                            <button class="icon-opt" data-icon="&#128722;">&#128722;</button>
+                            <button class="icon-opt" data-icon="&#128193;">&#128193;</button>
+                        </div>
+                    </div>
+                    <button class="primary-btn" id="btnSaveRoom" data-i18n="save">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Add Item -->
+        <div class="modal-overlay" id="modalAddItem" style="display:none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 id="itemModalTitle" data-i18n="add_item">Add Item</h3>
+                    <button class="close-btn" id="btnCloseAddItem">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label data-i18n="item_name">Item Name</label>
+                        <input type="text" id="inputItemName" class="form-input" placeholder="e.g. Samsung TV">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label data-i18n="purchase_price">Purchase Price</label>
+                            <input type="number" id="inputItemPrice" class="form-input" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <div class="form-group half">
+                            <label data-i18n="purchase_date">Purchase Date</label>
+                            <input type="date" id="inputItemDate" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="brand_model">Brand / Model</label>
+                        <input type="text" id="inputItemBrand" class="form-input" placeholder="e.g. Samsung UN65AU8000">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="serial_number">Serial Number</label>
+                        <input type="text" id="inputItemSerial" class="form-input" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="photo">Photo</label>
+                        <div class="photo-upload-area" id="photoUploadArea">
+                            <span data-i18n="tap_to_add_photo">Tap to add photo</span>
+                            <img id="photoPreview" style="display:none; max-width:100%; border-radius:8px; margin-top:8px;">
+                            <input type="file" id="inputItemPhoto" accept="image/*" style="display:none;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="notes">Notes</label>
+                        <textarea id="inputItemNotes" class="form-input" rows="2" placeholder="Optional"></textarea>
+                    </div>
+                    <button class="primary-btn" id="btnSaveItem" data-i18n="save">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Language Picker -->
+        <div class="modal-overlay" id="modalLang" style="display:none;">
+            <div class="modal modal-sm">
+                <div class="modal-header">
+                    <h3 data-i18n="select_language">Language</h3>
+                    <button class="close-btn" id="btnCloseLang">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <button class="lang-btn" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="zh">&#20013;&#25991;</button>
+                    <button class="lang-btn" data-lang="es">Espa&#241;ol</button>
+                    <button class="lang-btn" data-lang="ja">&#26085;&#26412;&#35486;</button>
+                    <button class="lang-btn" data-lang="de">Deutsch</button>
+                    <button class="lang-btn" data-lang="fr">Fran&#231;ais</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
